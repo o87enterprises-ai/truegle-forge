@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Truegle Forge – Web</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #111; color: #eee; }
+        textarea { width: 100%; height: 100px; background: #222; color: #eee; border: 1px solid #444; padding: 10px; }
+        button { background: #4CAF50; color: white; border: none; padding: 12px 24px; cursor: pointer; margin-top: 10px; }
+        #response { white-space: pre-wrap; background: #222; padding: 15px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🤖 Truegle Forge</h1>
+    <textarea id="prompt" placeholder="Ask me anything..."></textarea>
+    <button onclick="sendPrompt()">Send</button>
+    <div id="response"></div>
+    <script>
+        async function sendPrompt() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) return;
+            const respDiv = document.getElementById('response');
+            respDiv.textContent = 'Thinking...';
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    respDiv.textContent = 'Error: ' + data.error;
+                } else {
+                    respDiv.textContent = data.response;
+                }
+            } catch (e) {
+                respDiv.textContent = 'Network error: ' + e;
+            }
+        }
+        document.getElementById('prompt').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendPrompt();
+        });
+    </script>
+</body>
+</html>
