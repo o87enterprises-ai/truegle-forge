@@ -1,44 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Truegle Forge – Web</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truegle Forge – Sovereign AI</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #111; color: #eee; }
-        textarea { width: 100%; height: 100px; background: #222; color: #eee; border: 1px solid #444; padding: 10px; }
-        button { background: #4CAF50; color: white; border: none; padding: 12px 24px; cursor: pointer; margin-top: 10px; }
-        #response { white-space: pre-wrap; background: #222; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#000; color:#fff; font-family:system-ui,sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+        .app { max-width:820px; width:100%; background:#0a0a0a; border-radius:24px; padding:30px 28px 40px; border:1px solid #1a1a1a; }
+        .header { display:flex; align-items:center; gap:16px; margin-bottom:28px; border-bottom:1px solid #1a1a1a; padding-bottom:20px; }
+        .header img { height:44px; border-radius:8px; }
+        .header h1 { font-size:26px; font-weight:700; background:linear-gradient(135deg,#fff 60%,#0055ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .header .tagline { font-size:13px; color:#888; margin-left:auto; border:1px solid #222; padding:4px 14px; border-radius:40px; background:#111; }
+        .chat-box { background:#0d0d0d; border-radius:16px; padding:20px 18px; min-height:360px; max-height:540px; overflow-y:auto; margin-bottom:20px; border:1px solid #171717; }
+        .chat-box .message { margin-bottom:18px; padding:14px 18px; border-radius:16px; line-height:1.6; animation:fadeIn .25s ease; }
+        .chat-box .user-message { background:#141414; border-left:3px solid #0055ff; text-align:right; color:#eee; }
+        .chat-box .assistant-message { background:#121212; border-left:3px solid #ff3300; color:#f0f0f0; white-space:pre-wrap; }
+        .chat-box .empty-state { color:#555; text-align:center; padding:60px 20px; }
+        .chat-box .empty-state span { color:#0055ff; }
+        .input-area { display:flex; gap:12px; background:#0d0d0d; padding:10px 10px 10px 18px; border-radius:60px; border:1px solid #1f1f1f; }
+        .input-area input { flex:1; background:transparent; border:none; outline:none; color:#fff; font-size:15px; padding:10px 0; }
+        .input-area input::placeholder { color:#555; }
+        .input-area button { background:#0055ff; border:none; color:#fff; font-weight:600; padding:10px 28px; border-radius:60px; cursor:pointer; transition:background .2s; }
+        .input-area button:hover { background:#1a66ff; }
+        .input-area button:disabled { background:#333; opacity:.6; cursor:not-allowed; }
+        .footer { margin-top:22px; text-align:center; font-size:12px; color:#333; }
+        .footer a { color:#0055ff; text-decoration:none; }
+        @keyframes fadeIn { from { opacity:.4; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
     </style>
 </head>
 <body>
-    <h1>🤖 Truegle Forge</h1>
-    <textarea id="prompt" placeholder="Ask me anything..."></textarea>
-    <button onclick="sendPrompt()">Send</button>
-    <div id="response"></div>
-    <script>
-        async function sendPrompt() {
-            const prompt = document.getElementById('prompt').value;
-            if (!prompt) return;
-            const respDiv = document.getElementById('response');
-            respDiv.textContent = 'Thinking...';
-            try {
-                const res = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-                const data = await res.json();
-                if (data.error) {
-                    respDiv.textContent = 'Error: ' + data.error;
-                } else {
-                    respDiv.textContent = data.response;
-                }
-            } catch (e) {
-                respDiv.textContent = 'Network error: ' + e;
-            }
-        }
-        document.getElementById('prompt').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendPrompt();
-        });
-    </script>
+<div class="app">
+    <div class="header">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Truegle">
+        <h1>Truegle Forge</h1>
+        <span class="tagline">Unbiased · Transparent · Secure</span>
+    </div>
+    <div id="chatBox" class="chat-box">
+        <div class="empty-state">⚡ <span>Truegle Forge</span> is ready.<br>Ask me anything with sovereign AI.</div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Type your message…" autofocus>
+        <button id="sendBtn">Send</button>
+    </div>
+    <div class="footer"><a href="https://truegle.info" target="_blank">truegle.info</a> &nbsp;·&nbsp; sovereign AI</div>
+</div>
+<script>
+    const chatBox=document.getElementById('chatBox'), input=document.getElementById('userInput'), btn=document.getElementById('sendBtn');
+    function addMsg(t,s){ const m=document.createElement('div'); m.className=`message ${s}-message`; m.textContent=t; const e=chatBox.querySelector('.empty-state'); if(e) e.remove(); chatBox.appendChild(m); chatBox.scrollTop=chatBox.scrollHeight; }
+    async function send(){ const p=input.value.trim(); if(!p) return; addMsg(p,'user'); input.value=''; btn.disabled=true; btn.textContent='…'; try{ const r=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p})}); const d=await r.json(); addMsg(d.response||'No response.','assistant'); }catch(e){ addMsg('Error: Could not reach server.','assistant'); }finally{ btn.disabled=false; btn.textContent='Send'; input.focus(); } }
+    btn.addEventListener('click',send); input.addEventListener('keydown',e=>{ if(e.key==='Enter') send(); });
+</script>
 </body>
 </html>

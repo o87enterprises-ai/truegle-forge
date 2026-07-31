@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
+print("GROQ_API_KEY loaded:", os.getenv('GROQ_API_KEY')[:10] + "..." if os.getenv('GROQ_API_KEY') else "NOT FOUND")
 
 app = Flask(__name__)
 
@@ -74,4 +75,6 @@ def chat():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
