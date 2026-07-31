@@ -8,15 +8,16 @@ from datetime import datetime
 import requests
 
 # ========== CONFIG ==========
-HOME = os.path.expanduser("~")
-BASE_DIR = os.path.join(HOME, "truegle-forge")
+# Determine project root from this script's location (harness/forge.py)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MEMORY_DIR = os.path.join(BASE_DIR, "memory")
 SKILLS_DIR = os.path.join(BASE_DIR, "skills")
 TMP_DIR = os.path.join(BASE_DIR, "tmp")
 DB_PATH = os.path.join(MEMORY_DIR, "sessions.db")
 SYSTEM_PROMPT_PATH = os.path.join(SKILLS_DIR, "system_prompt.txt")
 
-# Ensure tmp dir exists
+# Ensure necessary directories exist
+os.makedirs(MEMORY_DIR, exist_ok=True)
 os.makedirs(TMP_DIR, exist_ok=True)
 
 def load_system_prompt():
