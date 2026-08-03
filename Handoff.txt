@@ -1,0 +1,137 @@
+# 🔄 Session Handoff – Truegle Forge
+
+**Date:** July 30, 2026  
+**Session Goal:** Build a sovereign, uncensored AI assistant (Truegle Forge) with a CLI harness for Termux (Android) and a web UI, deployable to the cloud.  
+
+---
+
+## ✅ Accomplished This Session
+
+- Created `forge.py` – a Python harness that runs locally (via Ollama) or in the cloud (via Groq API).  
+- Installed Ollama and pulled `qwen2.5:1.5b` for local inference (lightweight, works on phone).  
+- Wrote a **Truegle system prompt** (full sovereign/jailbreak version) and saved it to `skills/system_prompt.txt`.  
+- Built a **Flask web app** (`web/app.py`) with a simple HTML frontend that uses the same system prompt and Groq API.  
+- Set up a Git repository, pushed to GitHub (after removing `.env` secret).  
+- Created a Hugging Face Space via CLI (Docker, Python 3.10) and added the remote.
+
+---
+
+## 📁 Project Structure
+
+```
+~/truegle-forge/
+├── .env                      # Groq API key (not in Git)
+├── .gitignore                # Excludes .env, memory/, tmp/, etc.
+├── harness/
+│   └── forge.py              # Main CLI harness (local/cloud modes)
+├── skills/
+│   └── system_prompt.txt     # The Truegle system prompt
+├── memory/
+│   └── sessions.db           # SQLite (cloud mode only, currently empty)
+├── tmp/
+│   └── project_tree.txt      # Auto‑generated file list for local context
+├── web/
+│   ├── app.py                # Flask backend
+│   ├── requirements.txt      # flask, openai, python-dotenv
+│   └── templates/
+│       └── index.html        # Frontend UI
+└── README.md                 (optional – not yet created)
+```
+
+---
+
+## 🧰 Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| **Local model** | Ollama + `qwen2.5:1.5b` |
+| **Cloud model** | Groq API (`llama-3.3-70b-versatile`) |
+| **CLI** | Python 3.14, subprocess, argparse |
+| **Web backend** | Flask, OpenAI client, python-dotenv |
+| **Frontend** | HTML/CSS/JS (single page) |
+| **Deployment** | Hugging Face Spaces (Docker, Python 3.10) |
+| **Version control** | Git + GitHub (remote: `o87enterprises-ai/truegle-forge`) |
+| **Memory** | SQLite (logs only for cloud mode; local is stateless) |
+
+---
+
+## 🔄 Key Revisions & Decisions
+
+- **Removed ChromaDB / sentence‑transformers** – too heavy for Termux; now use SQLite for history (cloud only) and no vector memory.
+- **Local mode** – no conversation history; uses a short, project‑aware prompt (with file tree).
+- **Cloud mode** – uses the full Truegle system prompt and logs exchanges in SQLite.
+- **Timeout** – set to 180 seconds for local; 60 seconds for summariser (both adjustable).
+- **.env secret removed** from Git history (GitHub push protection blocked it).
+- **Hugging Face Space** – created via CLI (`huggingface-cli repo create`) to avoid web UI issues on mobile.
+
+---
+
+## 🎯 Current Task (Unfinished)
+
+**Deploy the web app to Hugging Face Spaces** and verify it works.
+
+### Remaining Steps
+
+1. **Push to HF remote**  
+   ```bash
+   cd ~/truegle-forge
+   git push hf main
+   ```
+
+2. **Set environment variables**  
+   - Go to Space Settings → Repository secrets → add `GROQ_API_KEY`.  
+   - (Optional) `GROQ_MODEL`, `GROQ_BASE_URL`.
+
+3. **Wait for build** – check logs in the Space's Files tab.
+
+4. **Test the public URL** – open `https://YOUR_USERNAME-truegle-forge.hf.space` and send a prompt.
+
+5. (Optional) **Add persistent memory** using Neon/Supabase – not yet implemented.
+
+---
+
+## 🧪 Testing Commands (for reference)
+
+```bash
+# Local mode (offline)
+python harness/forge.py "What is your purpose?" --mode local
+
+# Cloud mode (Groq)
+python harness/forge.py "What is your purpose?" --mode cloud
+
+# Reset memory
+python harness/forge.py --reset-memory
+```
+
+---
+
+## 📌 Notes for Next Session
+
+- The local model (`qwen2.5:1.5b`) gives short responses; for better quality, consider using `qwen2.5:3b` or `deepseek-r1:1.5b` (you have both installed).  
+- The summariser function is not used in local mode, only for cloud context trimming (disabled by default).  
+- The web app is stateless; each request is independent. If you need chat history, we can add a database layer later.
+
+---
+
+## 🚀 Next Steps (Suggested Order)
+
+1. Push to HF Space and verify the web UI works.  
+2. Optionally add a `README.md` with installation and usage instructions.  
+3. Explore adding tool‑calling capabilities (bash, file edits) via the web interface.  
+4. Integrate a database (Neon/Supabase) for persistent conversation memory across sessions.
+
+---
+
+## 📂 Handoff File Location
+
+You can save this text as `HANDOFF.md` in your project root for future reference:
+
+```bash
+cat > ~/truegle-forge/HANDOFF.md << 'EOF'
+[PASTE THIS CONTENT]
+EOF
+```
+
+---
+
+**End of handoff.** You're ready to pick up exactly where we left off.
